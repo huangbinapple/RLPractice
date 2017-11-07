@@ -45,10 +45,10 @@ def mcEvaluatePolicy():
     nEpisode = 10000
     counter = np.zeros_like(values, dtype=np.uint32)
     for n in range(nEpisode):
-        # Initialize state.
         nStep = 0
-        i, j = 1, 3
         scoreHistory = []
+        # Initialize state.
+        i, j = random.randrange(WORLD_SIZE), random.randrange(WORLD_SIZE)
         # This record number of step have taken when a state being visited the first time.
         firstVisit = - np.ones_like(values, dtype=np.int32)
         while not (i == j == 0 or i == j == WORLD_SIZE - 1):
