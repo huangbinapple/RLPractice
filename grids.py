@@ -99,6 +99,22 @@ def tdEvaluatePolicy(lambda_=0, alpha=.1):
     print(values)
     return values
 
+def tdlambdaEvaluatePolicy(lambda_):
+    """Evaluate a policy using TD(lambda)"""
+    values = initValueMatrix()
+    nEpisode = 10000
+    for n in range(nEpisode):
+        # Initialize state.
+        i, j = random.randrange(WORLD_SIZE), random.randrange(WORLD_SIZE)
+        eligibility = np.zeros_like(values, dtype=np.float64)
+        while not (i == j == 0 or i == j == WORLD_SIZE - 1):
+            # Update eligibility matrix.
+            eligibility *= lambda_
+            eligibility[i, j] += 1
+            
+
+        
+
 def evaluatePolicy():
     """Evaluate a policy using synchronous DP"""
     values = initValueMatrix()
