@@ -6,6 +6,7 @@ if hit the board of the grid world, stay still.
 import numpy as np
 import itertools
 import enum
+import random
 
 WORLD_SIZE = 4
 
@@ -37,6 +38,51 @@ def next(i ,j, action):
     elif action == Action.RIGHT and j < WORLD_SIZE - 1:
         j += 1
     return i, j
+
+def mcEvaluatePolicy():
+    """Evaluate a policy using first-visit M.C. method."""
+    values = initValueMatrix()
+    nEpisode = 10000
+    counter = np.zeros_like(values, dtype=np.uint32)
+    for n in range(nEpisode):
+        # Initialize state.
+        nStep = 0
+        i, j = 1, 3
+        scoreHistory = []
+        # This record number of step have taken when a state being visited the first time.
+        firstVisit = - np.ones_like(values, dtype=np.int32)
+        while not (i == j == 0 or i == j == WORD_SIZE - 1):
+            # print("state: {}".format((i, j)))
+            # Record current state.
+            if firstVisit[i, j] == -1:
+                # print("First visit {} in step {}".format((i, j), nStep))
+                firstVisit[i, j] = nStep
+            # Go to next state.
+            i, j = next(i, j, random.choice((Action.UP, Action.DOWN, Action.LEFT, Action.RIGHT)))
+            # Update loop variable.
+            nStep += 1
+            scoreHistory.append(-1)
+
+        # Calculate 'scores' matrix in this episode and update `counter` matrix.
+        assert len(scoreHistory) == nStep
+        # `score` stores the reward of states in one episode.
+        scores = np.zeros_like(values, dtype=np.int32)
+        for i, j in itertools.product(range(firstVisit.shape[0]), range(firstVisit.shape[1])):
+            if firstVisit[i, j] > -1:
+                scores[i, j] = sum(scoreHistory[firstVisit[i, j]:])
+                # `counter` stores number of first visit of a state across episodes.
+                counter[i, j] += 1
+
+        # Update value matrix.
+        updateIndex = firstVisit > -1
+        values[updateIndex] += (scores[updateIndex] - values[updateIndex]) / counter[updateIndex]
+        # print('------')
+    print(values)
+    print(firstVisit)
+    print(scores)
+    print(counter)
+    return values
+
 
 def evaluatePolicy():
     """Evaluate a policy using synchronous DP"""
@@ -74,7 +120,7 @@ def _testNext():
 
 
 def main():
-    evaluatePolicy()
+    mcEvaluatePolicy()
    
 
 if __name__ == '__main__':
