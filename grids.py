@@ -51,7 +51,7 @@ def mcEvaluatePolicy():
         scoreHistory = []
         # This record number of step have taken when a state being visited the first time.
         firstVisit = - np.ones_like(values, dtype=np.int32)
-        while not (i == j == 0 or i == j == WORD_SIZE - 1):
+        while not (i == j == 0 or i == j == WORLD_SIZE - 1):
             # print("state: {}".format((i, j)))
             # Record current state.
             if firstVisit[i, j] == -1:
