@@ -39,6 +39,7 @@ def next(i ,j, action):
     return i, j
 
 def evaluatePolicy():
+    """Evaluate a policy using synchronous DP"""
     values = initValueMatrix()
     niter = 0
     while(True):
