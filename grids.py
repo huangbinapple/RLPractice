@@ -52,10 +52,8 @@ def mcEvaluatePolicy():
         # This record number of step have taken when a state being visited the first time.
         firstVisit = - np.ones_like(values, dtype=np.int32)
         while not (i == j == 0 or i == j == WORLD_SIZE - 1):
-            # print("state: {}".format((i, j)))
             # Record current state.
             if firstVisit[i, j] == -1:
-                # print("First visit {} in step {}".format((i, j), nStep))
                 firstVisit[i, j] = nStep
             # Go to next state.
             i, j = next(i, j, random.choice((Action.UP, Action.DOWN, Action.LEFT, Action.RIGHT)))
@@ -76,11 +74,7 @@ def mcEvaluatePolicy():
         # Update value matrix.
         updateIndex = firstVisit > -1
         values[updateIndex] += (scores[updateIndex] - values[updateIndex]) / counter[updateIndex]
-        # print('------')
     print(values)
-    print(firstVisit)
-    print(scores)
-    print(counter)
     return values
 
 
