@@ -30,11 +30,11 @@ def next(i ,j, action):
         return i, j
     if action == Action.UP and i > 0:
         i -= 1
-    if action == Action.DOWN and i < WORD_SIZE - 1:
+    elif action == Action.DOWN and i < WORD_SIZE - 1:
         i += 1
-    if action == Action.LEFT and j > 0:
+    elif action == Action.LEFT and j > 0:
         j -= 1
-    if action == Action.RIGHT and j < WORD_SIZE - 1:
+    elif action == Action.RIGHT and j < WORD_SIZE - 1:
         j += 1
     return i, j
 
@@ -73,7 +73,7 @@ def _testNext():
 
 
 def main():
-    print(evaluatePolicy())
+    evaluatePolicy()
    
 
 if __name__ == '__main__':
