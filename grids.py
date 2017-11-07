@@ -78,6 +78,27 @@ def mcEvaluatePolicy():
     return values
 
 
+def tdEvaluatePolicy(lambda_=0, alpha=.1):
+    """Evaluate a policy using TD(lambda)"""
+    values = initValueMatrix()
+    nStep = 500000
+    for n in range(nStep):
+        # Start from a random state.
+        rewards = []
+        i, j = random.randrange(WORLD_SIZE), random.randrange(WORLD_SIZE)
+        i_, j_ = i, j
+        # Move `lambda_` + 1 step.
+        for k in range(lambda_ + 1):
+            # Collect reward.
+            rewards.append(getReward(i_, j_))
+            # Move one step.
+            i_, j_ = next(i_, j_, random.choice((Action.UP, Action.DOWN, Action.LEFT, Action.RIGHT)))
+        tdTarget = values[i_, j_] + sum(rewards)
+        # Update values matrix in state (i, j).
+        values[i, j] += alpha * (tdTarget - values[i, j])
+    print(values)
+    return values
+
 def evaluatePolicy():
     """Evaluate a policy using synchronous DP"""
     values = initValueMatrix()
@@ -114,7 +135,7 @@ def _testNext():
 
 
 def main():
-    mcEvaluatePolicy()
+    tdEvaluatePolicy()
    
 
 if __name__ == '__main__':
