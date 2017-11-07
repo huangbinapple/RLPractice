@@ -7,10 +7,10 @@ import numpy as np
 import itertools
 import enum
 
-WORD_SIZE = 4
+WORLD_SIZE = 4
 
 def initValueMatrix():
-    return np.zeros((WORD_SIZE, WORD_SIZE))
+    return np.zeros((WORLD_SIZE, WORLD_SIZE))
 
 class Action(enum.Enum):
     UP = 0
@@ -19,22 +19,22 @@ class Action(enum.Enum):
     RIGHT = 3
 
 def getReward(i, j):
-    if i == j == 0 or i == j == WORD_SIZE - 1:
+    if i == j == 0 or i == j == WORLD_SIZE - 1:
         return 0
     else:
         return -1
 
 def next(i ,j, action):
-    if i == j == 0 or i == j == WORD_SIZE - 1:
+    if i == j == 0 or i == j == WORLD_SIZE - 1:
         # Start from terminate states.
         return i, j
     if action == Action.UP and i > 0:
         i -= 1
-    elif action == Action.DOWN and i < WORD_SIZE - 1:
+    elif action == Action.DOWN and i < WORLD_SIZE - 1:
         i += 1
     elif action == Action.LEFT and j > 0:
         j -= 1
-    elif action == Action.RIGHT and j < WORD_SIZE - 1:
+    elif action == Action.RIGHT and j < WORLD_SIZE - 1:
         j += 1
     return i, j
 
