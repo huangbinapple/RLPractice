@@ -99,7 +99,7 @@ def tdEvaluatePolicy(lambda_=0, alpha=.1):
     print(values)
     return values
 
-def tdlambdaEvaluatePolicy(lambda_):
+def tdlambdaEvaluatePolicy(lambda_=.9, alpha=.1):
     """Evaluate a policy using TD(lambda)"""
     values = initValueMatrix()
     nEpisode = 10000
@@ -111,9 +111,15 @@ def tdlambdaEvaluatePolicy(lambda_):
             # Update eligibility matrix.
             eligibility *= lambda_
             eligibility[i, j] += 1
-            
-
-        
+            # Go to next state.
+            i_, j_ = next(i, j, random.choice((Action.UP, Action.DOWN, Action.LEFT, Action.RIGHT)))
+            # Calculate td delta.
+            tdDelta = (getReward(i, j) + values[i_, j_]) - values[i, j]
+            # Update `values` matrix.
+            values += alpha * tdDelta * eligibility
+            i, j = i_, j_
+    print(values)
+    return values
 
 def evaluatePolicy():
     """Evaluate a policy using synchronous DP"""
@@ -151,7 +157,7 @@ def _testNext():
 
 
 def main():
-    tdEvaluatePolicy()
+    tdlambdaEvaluatePolicy(lambda_=.8, alpha=.1)
    
 
 if __name__ == '__main__':
