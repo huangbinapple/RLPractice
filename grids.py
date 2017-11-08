@@ -146,6 +146,53 @@ def evaluatePolicy():
     print(niter, values)
     return values
 
+def getGreedyPolicy(values):
+    """Given a value funtion of states, return the greedy policy."""
+    policy = np.empty_like(values, dtype=object)
+    for i, j in itertools.product(range(policy.shape[0]), range(policy.shape[1])):
+        bestAction = None
+        bestValue = None
+        for action in Action:
+            value = getReward(i, j) + values[next(i, j, action)]
+            if bestValue is None:
+                bestValue, bestAction = value, action
+            elif value > bestValue:
+                bestValue, bestAction = value, action
+        policy[i, j] = bestAction
+    return policy
+
+def testGetGreedyPolicy():
+    values = np.array([[0, -1, -1, -1],
+                       [0, 0, 0, 0],
+                       [0, 0, 4, 0],
+                       [0, 0, 0, 0]])
+    print('values')
+    print(values)
+    print('policy')
+    print(getGreedyPolicy(values))
+
+def valueIteration():
+    """Find the optimal values matrix and optimal policy using synchronous value iteration."""
+    values = initValueMatrix()
+    policy = getGreedyPolicy(values)
+    niter = 0
+    while True:
+        niter += 1
+        newValues = values.copy()
+        newPolicy = None
+        for i, j in itertools.product(range(values.shape[0]), range(values.shape[1])):
+            newValues[i, j] = getReward(i, j) + values[next(i, j, policy[i, j])]
+            newPolicy = getGreedyPolicy(newValues)
+        if (newPolicy == policy).all():
+            break
+        else:
+            values = newValues
+            policy = newPolicy
+    print("niter: ", niter)
+    print(policy)
+    print(values)
+    return values, policy
+
 def _testNext():
     inputs = ((0, 0, Action.RIGHT),
               (0, 1, Action.RIGHT),
@@ -157,7 +204,7 @@ def _testNext():
 
 
 def main():
-    tdlambdaEvaluatePolicy(lambda_=.8, alpha=.1)
+    valueIteration()
    
 
 if __name__ == '__main__':
