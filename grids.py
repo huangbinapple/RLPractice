@@ -161,7 +161,7 @@ def getGreedyPolicy(values):
         policy[i, j] = bestAction
     return policy
 
-def testGetGreedyPolicy():
+def _testGetGreedyPolicy():
     values = np.array([[0, -1, -1, -1],
                        [0, 0, 0, 0],
                        [0, 0, 4, 0],
