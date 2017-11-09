@@ -8,7 +8,7 @@ import itertools
 import enum
 import random
 
-WORLD_SIZE = 4
+WORLD_SIZE = 5
 
 def initValueMatrix():
     return np.zeros((WORLD_SIZE, WORLD_SIZE))
@@ -18,6 +18,9 @@ class Action(enum.Enum):
     DOWN = 1
     LEFT = 2
     RIGHT = 3
+
+def initQMatrix():
+    return np.zeros((WORLD_SIZE, WORLD_SIZE, len(Action)))
 
 def getReward(i, j):
     if i == j == 0 or i == j == WORLD_SIZE - 1:
@@ -193,6 +196,72 @@ def valueIteration():
     print(values)
     return values, policy
 
+def chooseAction(i, j, qMatrix, epsion=.1):
+    """Choose action in state i, j using epsion-greedy policy accroding to qMatrix."""
+    if random.random() > epsion:
+        # Exploitation.
+        return Action(np.argmax(qMatrix[i, j]))
+    else:
+        # Exploration
+        return random.choice(list(Action))
+
+def mcFindOptimalPolicy():
+    """Find the optimal policy using M.C. search and epison greedy policy"""
+    qMatrix = initQMatrix()
+    nEpisode = 50000
+    counter = np.zeros_like(qMatrix, dtype=np.uint32)
+    epsion = 1
+    for n in range(nEpisode):
+        nStep = 0
+        scoreHistory = []
+        # Initialize state.
+        i, j = random.randrange(WORLD_SIZE), random.randrange(WORLD_SIZE)
+        # This record number of step have taken when a state being visited the first time.
+        firstVisit = - np.ones_like(qMatrix, dtype=np.int32)
+        while not (i == j == 0 or i == j == WORLD_SIZE - 1):
+            # print("current state: ", i, j)
+            action = chooseAction(i, j, qMatrix, epsion=epsion/(1+n))
+            # print("action:", action)
+            # Record current state action pair.
+            if firstVisit[i, j, action.value] == -1:
+                firstVisit[i, j, action.value] = nStep
+            # Go to next state.
+            i, j = next(i, j, action)
+            # Update loop variable.
+            nStep += 1
+            scoreHistory.append(-1)
+
+        # Calculate 'scores' matrix in this episode and update `counter` matrix.
+        assert len(scoreHistory) == nStep
+        # `score` stores the reward of states in one episode.
+        scores = np.zeros_like(qMatrix, dtype=np.int32)
+        for i, j, k in itertools.product(range(firstVisit.shape[0]), range(firstVisit.shape[1]), range(firstVisit.shape[2])):
+            if firstVisit[i, j, k] > -1:
+                scores[i, j, k] = sum(scoreHistory[firstVisit[i, j, k]:])
+                # `counter` stores number of first visit of a state across episodes.
+                counter[i, j, k] += 1
+
+        
+        # Update qMatrix.
+        updateIndex = firstVisit > -1
+        # print("qMatrix:", qMatrix)
+        qMatrix[updateIndex] += (scores[updateIndex] - qMatrix[updateIndex]) / counter[updateIndex]
+        # qMatrix[updateIndex] += .05 * (scores[updateIndex] - qMatrix[updateIndex])
+        # print("first visit:", firstVisit)
+        # print("qMatrix:", qMatrix)
+
+    optimalValue = qMatrix.max(axis=2)
+    optimalPolicyIndex = qMatrix.argmax(axis=2)
+    optimalPolicy = np.vectorize(Action)(optimalPolicyIndex)
+    print('counter')
+    print(counter.sum(axis=2))
+    print('value')
+    print(optimalValue)
+    print('policy')
+    print(optimalPolicy)
+    return optimalValue, optimalPolicy
+
+
 def _testNext():
     inputs = ((0, 0, Action.RIGHT),
               (0, 1, Action.RIGHT),
@@ -204,7 +273,7 @@ def _testNext():
 
 
 def main():
-    valueIteration()
+    mcFindOptimalPolicy()
    
 
 if __name__ == '__main__':
