@@ -206,7 +206,11 @@ def chooseAction(i, j, qMatrix, epsion=.1):
         return random.choice(list(Action))
 
 def mcFindOptimalPolicy():
-    """Find the optimal policy using M.C. search and epison greedy policy"""
+    """Find the optimal policy using M.C. search and epison greedy policy
+    Note:
+        This function seems not converge to optimal policy when world size is 5,
+        nEpisode is 50,000, epsion = 1 / (n + 1), qMatrix using stationary mean.
+    """
     qMatrix = initQMatrix()
     nEpisode = 50000
     counter = np.zeros_like(qMatrix, dtype=np.uint32)
