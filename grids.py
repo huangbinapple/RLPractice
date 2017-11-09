@@ -13,6 +13,12 @@ WORLD_SIZE = 5
 def initValueMatrix():
     return np.zeros((WORLD_SIZE, WORLD_SIZE))
 
+def isTerminateState(i, j):
+    if i == j == 0 or i == j == WORLD_SIZE - 1:
+        return True
+    else:
+        return False
+
 class Action(enum.Enum):
     UP = 0
     DOWN = 1
@@ -265,6 +271,43 @@ def mcFindOptimalPolicy():
     print(optimalPolicy)
     return optimalValue, optimalPolicy
 
+def sarsaFindOpitmalPolicy(alpha=.1):
+    qMatrix = initQMatrix()
+    nEpsion = 10000
+    nStep = 0
+    stepsPerEpisode = []
+    for n in range(nEpsion):
+        # Init state randomly.
+        i, j = (random.randrange(WORLD_SIZE) for i in range(2))
+        # Choose a action.
+        action = chooseAction(i, j, qMatrix, epsion=1/(n+1))
+        while not isTerminateState(i, j):
+            reward = getReward(i, j)
+            nextState = next(i, j, action)
+            nextAction = chooseAction(*nextState, qMatrix, epsion=1/(n+1))
+            tdTarget = reward + qMatrix[nextState + (nextAction.value,)]
+            tdDelta = tdTarget - qMatrix[i, j, action.value]
+            # Updatea qMatrix
+            qMatrix[i, j, action.value] += alpha * tdDelta
+            # Update loop variable.
+            i, j = nextState
+            action = nextAction
+            nStep += 1
+        stepsPerEpisode.append(nStep)
+    
+    optimalValue = qMatrix.max(axis=2)
+    optimalPolicyIndex = qMatrix.argmax(axis=2)
+    optimalPolicy = np.vectorize(Action)(optimalPolicyIndex)
+    print("nStep:", nStep)
+    print('value')
+    print(optimalValue)
+    print('policy')
+    print(optimalPolicy)
+    print('len:', len(stepsPerEpisode))
+    print(np.array(stepsPerEpisode[500: 600]) - np.array(stepsPerEpisode[499: 599]))
+    return optimalValue, optimalPolicy
+
+
 
 def _testNext():
     inputs = ((0, 0, Action.RIGHT),
@@ -277,7 +320,7 @@ def _testNext():
 
 
 def main():
-    mcFindOptimalPolicy()
+    sarsaFindOpitmalPolicy()
    
 
 if __name__ == '__main__':
