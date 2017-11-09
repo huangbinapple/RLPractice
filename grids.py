@@ -307,7 +307,45 @@ def sarsaFindOpitmalPolicy(alpha=.1):
     print(np.array(stepsPerEpisode[500: 600]) - np.array(stepsPerEpisode[499: 599]))
     return optimalValue, optimalPolicy
 
-
+def sarsaLambdaFindOpitmalPolicy(alpha=.1, lambda_=.9):
+    qMatrix = initQMatrix()
+    nEpsion = 10000
+    nStep = 0
+    stepsPerEpisode = []
+    for n in range(nEpsion):
+        # Init state randomly.
+        i, j = (random.randrange(WORLD_SIZE) for i in range(2))
+        eligibility = np.zeros_like(qMatrix)
+        # Choose a action.
+        action = chooseAction(i, j, qMatrix, epsion=1/(n+1))
+        while not isTerminateState(i, j):
+            # Update the `eligibility` matrix.
+            eligibility *= lambda_
+            eligibility[i, j, action.value] += 1
+            reward = getReward(i, j)
+            nextState = next(i, j, action)
+            nextAction = chooseAction(*nextState, qMatrix, epsion=1/(n+1))
+            tdTarget = reward + qMatrix[nextState + (nextAction.value,)]
+            tdDelta = tdTarget - qMatrix[i, j, action.value]
+            # Updatea qMatrix
+            qMatrix += alpha * tdDelta * eligibility
+            # Update loop variable.
+            i, j = nextState
+            action = nextAction
+            nStep += 1
+        stepsPerEpisode.append(nStep)
+    
+    optimalValue = qMatrix.max(axis=2)
+    optimalPolicyIndex = qMatrix.argmax(axis=2)
+    optimalPolicy = np.vectorize(Action)(optimalPolicyIndex)
+    print("nStep:", nStep)
+    print('value')
+    print(optimalValue)
+    print('policy')
+    print(optimalPolicy)
+    print('len:', len(stepsPerEpisode))
+    print(np.array(stepsPerEpisode[500: 600]) - np.array(stepsPerEpisode[499: 599]))
+    return optimalValue, optimalPolicy
 
 def _testNext():
     inputs = ((0, 0, Action.RIGHT),
@@ -320,7 +358,7 @@ def _testNext():
 
 
 def main():
-    sarsaFindOpitmalPolicy()
+    sarsaLambdaFindOpitmalPolicy()
    
 
 if __name__ == '__main__':
